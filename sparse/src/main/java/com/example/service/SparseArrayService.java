@@ -1,5 +1,7 @@
 package com.example.service;
 
+import java.io.*;
+
 /**
  * @Author: wanqian
  * @Date: 2020/7/31 16:23
@@ -15,13 +17,31 @@ public class SparseArrayService {
         iniArray[9][8] = 10;
 
         int i = printArray(iniArray);
+        System.out.println("---------原数组---------");
+        System.out.println();
 
         int[][] parseArr = compressSparse(iniArray, i);
-        System.out.println("------------------" + parseArr);
+        System.out.println("---------压缩完成---------");
+        System.out.println();
+
+        String path = saveArr(parseArr);
+        System.out.printf("---------保存完成: %s----------\n", path);
+        System.out.println();
+
+        parseArr = loadArr(path);
         int[][] ints = decompressSparse(parseArr);
-        System.out.println("------------------" + ints);
+
+        System.out.println("---------解压完成---------");
     }
 
+
+    /**
+     * 压缩成稀疏数组
+     *
+     * @param iniArray
+     * @param num
+     * @return
+     */
     public static int[][] compressSparse(int[][] iniArray, int num) {
         int[][] sparse = new int[num + 1][3];
         sparse[0][0] = iniArray.length;
@@ -42,6 +62,12 @@ public class SparseArrayService {
         return sparse;
     }
 
+    /**
+     * 解压缩稀疏数组
+     *
+     * @param sparseArray
+     * @return
+     */
     public static int[][] decompressSparse(int[][] sparseArray) {
         int[][] iniArr = new int[sparseArray[0][0]][sparseArray[0][1]];
         for (int i = 1; i < sparseArray.length; i++) {
@@ -51,6 +77,12 @@ public class SparseArrayService {
         return iniArr;
     }
 
+    /**
+     * 打印数组
+     *
+     * @param array
+     * @return
+     */
     public static int printArray(int[][] array) {
         int num = 0;
         for (int[] i : array) {
@@ -64,5 +96,35 @@ public class SparseArrayService {
         }
         System.out.println("有效数字" + num + "个");
         return num;
+    }
+
+    public static String saveArr(int[][] array) {
+        File file = new File("array.bak");
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            objectOutputStream.writeObject(array);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file.getAbsolutePath();
+    }
+
+    private static int[][] loadArr(String path) {
+        File file = new File(path);
+        try (FileInputStream fis = new FileInputStream(file)) {
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            int[][] ints = (int[][]) ois.readObject();
+            return ints;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
